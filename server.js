@@ -11,10 +11,12 @@ const SPREADSHEET_ID = '1Spre-YvlqnUvXgUUOCEGbmO338GqekMGMwUmfeiEXEM';
 app.post('/inventario', async (req, res) => {
   try {
 
-    const auth = new google.auth.GoogleAuth({
-      credentials: require('./credentials.json'),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
+const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+
+const auth = new google.auth.GoogleAuth({
+  credentials,
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
 
     const client = await auth.getClient();
     const sheets = google.sheets({ version: 'v4', auth: client });
