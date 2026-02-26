@@ -15,7 +15,7 @@ const SPREADSHEET_ID = '1Spre-YvlqnUvXgUUOCEGbmO338GqekMGMwUmfeiEXEM';
 
 // --- Usuarios de prueba ---
 const USERS = [
-  { usuario: 'admin', password: '1234', token: 'token-admin' },
+  { usuario: 'UNISUCRE', password: 'QWERTY123', token: 'token-admin' },
   { usuario: 'user', password: 'abcd', token: 'token-user' }
 ];
 
