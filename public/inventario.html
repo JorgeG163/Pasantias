@@ -16,12 +16,11 @@
       font-family: 'Segoe UI', sans-serif;
     }
 
-    .container {
-      margin-top: 30px;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+    .main-box {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.08);
     }
 
     h1 {
@@ -31,8 +30,24 @@
     }
 
     .table-container {
-      overflow-x: auto;
-      max-height: 65vh;
+    overflow-x: auto;
+    max-height: 75vh;
+    }
+
+    @media (min-width: 1200px) {
+    .table-container {
+        overflow-x: visible;   /* en PC evita scroll horizontal */
+    }
+
+    table {
+        table-layout: auto;
+    }
+
+    @media (max-width: 1199px) {
+    th, td {
+        white-space: nowrap;
+    }
+    }
     }
 
     th {
@@ -69,8 +84,9 @@
 </head>
 
 <body>
-<div class="container">
+<div class="container-fluid px-4 mt-4">
 
+    <div class="main-box">
   <h1>Inventario de equipos</h1>
 
   <!-- FILTROS -->
