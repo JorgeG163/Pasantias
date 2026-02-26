@@ -208,6 +208,7 @@ function aplicarFiltros() {
   }
 
   renderTabla(filtrados);
+  actualizarDashboard(filtrados);
 }
 
 // Eventos filtros
