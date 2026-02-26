@@ -64,16 +64,19 @@ app.post('/inventario', async (req, res) => {
           data.codigoTeclado,
           data.codigoMouse,
           data.oficina,
-          data.ultimoMantenimiento,        
-          data.detalleMantenimiento,    
-          data.comentario,
+          data.tieneMantenimiento || '',
+          data.ultimoMantenimiento || '',
+          data.detalleMantenimientoPrevio || '',
+          data.necesitaMantenimiento || '',
+          data.detalleMantenimiento || '',
+          data.comentario || '',
           data.nombreDispositivo,
           data.procesador,
           data.ramInstalada,
           data.discoDuro,
           data.sistemaOperativo,
           data.direccionIP,
-          new Date().toISOString(),  
+          new Date().toISOString(),
         ]]
       }
     });
@@ -99,7 +102,7 @@ app.get('/inventario', authMiddleware, async (req, res) => {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'Pasantias!A2:O', // Desde la fila 2 para saltar encabezados
+      range: 'Pasantias!A2:R', // Ajustado a las nuevas columnas
     });
 
     const rows = response.data.values || [];
@@ -109,16 +112,19 @@ app.get('/inventario', authMiddleware, async (req, res) => {
       codigoTeclado: r[2],
       codigoMouse: r[3],
       oficina: r[4],
-      ultimoMantenimiento: r[5],
-      detalleMantenimiento: r[6],
-      comentario: r[7],
-      nombreDispositivo: r[8],
-      procesador: r[9],
-      ramInstalada: r[10],
-      discoDuro: r[11],
-      sistemaOperativo: r[12],
-      direccionIP: r[13],
-      fecha: r[14]
+      tieneMantenimiento: r[5],
+      ultimoMantenimiento: r[6],
+      detalleMantenimientoPrevio: r[7],
+      necesitaMantenimiento: r[8],
+      detalleMantenimiento: r[9],
+      comentario: r[10],
+      nombreDispositivo: r[11],
+      procesador: r[12],
+      ramInstalada: r[13],
+      discoDuro: r[14],
+      sistemaOperativo: r[15],
+      direccionIP: r[16],
+      fecha: r[17]
     }));
 
     res.json(equipos);

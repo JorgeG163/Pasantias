@@ -50,32 +50,35 @@ async function cargarInventario() {
     });
     const equipos = await res.json();
 
-        equiposTable.innerHTML = '';
-        equipos.forEach(eq => {
-        equiposTable.innerHTML += `
-            <tr>
-            <td>${eq.codigoTorre}</td>
-            <td>${eq.codigoPantalla}</td>
-            <td>${eq.codigoTeclado}</td>
-            <td>${eq.codigoMouse}</td>
-            <td>${eq.oficina}</td>
-            <td>${eq.ultimoMantenimiento || ''}</td>
-            <td>${eq.detalleMantenimiento || ''}</td>
-            <td>${eq.comentario || ''}</td>
-            <td>${eq.nombreDispositivo}</td>
-            <td>${eq.procesador}</td>
-            <td>${eq.ramInstalada}</td>
-            <td>${eq.discoDuro}</td>
-            <td>${eq.sistemaOperativo}</td>
-            <td>${eq.direccionIP}</td>
-            <td>${eq.fecha || ''}</td>
-            </tr>
-        `;
-        });
+    equiposTable.innerHTML = '';
+    equipos.forEach(eq => {
+      equiposTable.innerHTML += `
+        <tr>
+          <td>${eq.codigoTorre}</td>
+          <td>${eq.codigoPantalla}</td>
+          <td>${eq.codigoTeclado}</td>
+          <td>${eq.codigoMouse}</td>
+          <td>${eq.oficina}</td>
+          <td>${eq.tieneMantenimiento || ''}</td>
+          <td>${eq.ultimoMantenimiento || ''}</td>
+          <td>${eq.detalleMantenimientoPrevio || ''}</td>
+          <td>${eq.necesitaMantenimiento || ''}</td>
+          <td>${eq.detalleMantenimiento || ''}</td>
+          <td>${eq.comentario || ''}</td>
+          <td>${eq.nombreDispositivo}</td>
+          <td>${eq.procesador}</td>
+          <td>${eq.ramInstalada}</td>
+          <td>${eq.discoDuro}</td>
+          <td>${eq.sistemaOperativo}</td>
+          <td>${eq.direccionIP}</td>
+          <td>${eq.fecha || ''}</td>
+        </tr>
+      `;
+    });
 
   } catch (err) {
     console.error(err);
-    equiposTable.innerHTML = `<tr><td colspan="8">Error al cargar inventario</td></tr>`;
+    equiposTable.innerHTML = `<tr><td colspan="18">Error al cargar inventario</td></tr>`;
   }
 }
 
