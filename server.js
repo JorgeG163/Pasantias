@@ -41,7 +41,9 @@ const auth = new google.auth.GoogleAuth({
           data.discoDuro,
           data.sistemaOperativo,
           data.direccionIP,
-          new Date().toISOString()
+          new Date().toISOString(),
+          data.ultimoMantenimiento,        
+          data.detalleMantenimiento        
         ]]
       }
     });
