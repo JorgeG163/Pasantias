@@ -34,6 +34,8 @@ const auth = new google.auth.GoogleAuth({
           data.codigoTeclado,
           data.codigoMouse,
           data.oficina,
+          data.ultimoMantenimiento,        
+          data.detalleMantenimiento,    
           data.comentario,
           data.nombreDispositivo,
           data.procesador,
@@ -41,9 +43,7 @@ const auth = new google.auth.GoogleAuth({
           data.discoDuro,
           data.sistemaOperativo,
           data.direccionIP,
-          new Date().toISOString(),
-          data.ultimoMantenimiento,        
-          data.detalleMantenimiento        
+          new Date().toISOString(),  
         ]]
       }
     });
