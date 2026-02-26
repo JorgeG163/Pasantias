@@ -105,8 +105,8 @@ app.get('/inventario', authMiddleware, async (req, res) => {
       range: 'Pasantias!A2:R', // Ajustado a las nuevas columnas
     });
 
-const rows = response.data.values;
-const datos = rows.slice(1).map((row, index) => ({
+const rows = response.data.values || [];
+const datos = rows.map((row, index) => ({
   id: index + 2, 
   codigoTorre: row[0],
   codigoPantalla: row[1],
@@ -144,16 +144,25 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Servidor corriendo en puerto', PORT));
 
-app.delete('/inventario/:id', verificarToken, async (req, res) => {
-  const fila = parseInt(req.params.id);
-
+app.delete('/inventario/:id', authMiddleware, async (req, res) => {
   try {
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `Hoja1!A${fila}:R${fila}`
+    const fila = parseInt(req.params.id);
+
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    res.json({ mensaje: "Equipo eliminado correctamente" });
+    const client = await auth.getClient();
+    const sheets = google.sheets({ version: 'v4', auth: client });
+
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `Pasantias!A${fila}:R${fila}`
+    });
+
+    res.json({ success: true });
 
   } catch (error) {
     console.error(error);
