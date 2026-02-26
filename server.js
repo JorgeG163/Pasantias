@@ -105,29 +105,30 @@ app.get('/inventario', authMiddleware, async (req, res) => {
       range: 'Pasantias!A2:R', // Ajustado a las nuevas columnas
     });
 
-    const rows = response.data.values || [];
-    const equipos = rows.map(r => ({
-      codigoTorre: r[0],
-      codigoPantalla: r[1],
-      codigoTeclado: r[2],
-      codigoMouse: r[3],
-      oficina: r[4],
-      tieneMantenimiento: r[5],
-      ultimoMantenimiento: r[6],
-      detalleMantenimientoPrevio: r[7],
-      necesitaMantenimiento: r[8],
-      detalleMantenimiento: r[9],
-      comentario: r[10],
-      nombreDispositivo: r[11],
-      procesador: r[12],
-      ramInstalada: r[13],
-      discoDuro: r[14],
-      sistemaOperativo: r[15],
-      direccionIP: r[16],
-      fecha: r[17]
-    }));
+const rows = response.data.values;
+const datos = rows.slice(1).map((row, index) => ({
+  id: index + 2, 
+  codigoTorre: row[0],
+  codigoPantalla: row[1],
+  codigoTeclado: row[2],
+  codigoMouse: row[3],
+  oficina: row[4],
+  tieneMantenimiento: row[5],
+  ultimoMantenimiento: row[6],
+  detalleMantenimientoPrevio: row[7],
+  necesitaMantenimiento: row[8],
+  detalleMantenimiento: row[9],
+  comentario: row[10],
+  nombreDispositivo: row[11],
+  procesador: row[12],
+  ramInstalada: row[13],
+  discoDuro: row[14],
+  sistemaOperativo: row[15],
+  direccionIP: row[16],
+  fecha: row[17]
+}));
 
-    res.json(equipos);
+res.json(datos);
 
   } catch (err) {
     console.error(err);
@@ -142,3 +143,20 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Servidor corriendo en puerto', PORT));
+
+app.delete('/inventario/:id', verificarToken, async (req, res) => {
+  const fila = parseInt(req.params.id);
+
+  try {
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `Hoja1!A${fila}:R${fila}`
+    });
+
+    res.json({ mensaje: "Equipo eliminado correctamente" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al eliminar equipo" });
+  }
+});

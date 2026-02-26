@@ -64,6 +64,7 @@ async function cargarInventario() {
 
     if (filterOffice) cargarOficinas();
     renderTabla(equiposGlobal);
+    actualizarDashboard();
 
   } catch (err) {
     console.error(err);
@@ -125,12 +126,32 @@ function renderTabla(data) {
       </td>
     `;
 
-    // BORRAR (visual)
-    tr.querySelector(".delete-btn").addEventListener("click", () => {
-      if (confirm("¿Eliminar este equipo?")) {
-        tr.remove();
+tr.querySelector(".delete-btn").addEventListener("click", async () => {
+  if (!confirm("¿Eliminar este equipo definitivamente?")) return;
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${API_URL}/inventario/${eq.id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
       }
     });
+
+    if (!res.ok) throw new Error("Error al eliminar");
+
+    // Eliminar de array local
+    equiposGlobal = equiposGlobal.filter(e => e.id !== eq.id);
+
+    aplicarFiltros(); // vuelve a renderizar
+    actualizarDashboard(); // actualiza estadísticas
+
+  } catch (error) {
+    alert("Error al eliminar en el servidor");
+    console.error(error);
+  }
+});
 
     // EDITAR en línea
     tr.querySelector(".edit-btn").addEventListener("click", function () {
@@ -201,4 +222,23 @@ if (logoutBtn) {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
   });
+}
+
+function actualizarDashboard() {
+  const total = equiposGlobal.length;
+
+  const necesitan = equiposGlobal.filter(
+    e => e.necesitaMantenimiento === "Sí"
+  ).length;
+
+  const noNecesitan = total - necesitan;
+
+  const oficinasUnicas = new Set(
+    equiposGlobal.map(e => e.oficina)
+  ).size;
+
+  document.getElementById("totalEquipos").textContent = total;
+  document.getElementById("equiposMantenimiento").textContent = necesitan;
+  document.getElementById("equiposOk").textContent = noNecesitan;
+  document.getElementById("totalOficinas").textContent = oficinasUnicas;
 }
