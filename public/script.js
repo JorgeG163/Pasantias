@@ -1,5 +1,7 @@
 // URL base de tu servidor
-const API_URL = 'https://pasantias-j1sf.onrender.com';
+const API_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : 'https://pasantias-j1sf.onrender.com';
 
 // ----------------- LOGIN -----------------
 const loginBtn = document.getElementById('loginBtn');
