@@ -66,7 +66,7 @@ async function cargarInventario() {
 
     if (filterOffice) cargarOficinas();
     renderTabla(equiposGlobal);
-    actualizarDashboard();
+    actualizarDashboard(equiposGlobal);
 
   } catch (err) {
     console.error(err);
