@@ -6,6 +6,8 @@ const API_URL = window.location.hostname === 'localhost'
 // ----------------- LOGIN -----------------
 const loginBtn = document.getElementById('loginBtn');
 const statusDiv = document.getElementById('status');
+let chartMantenimiento;
+let chartOficinas;
 
 if (loginBtn) {
   loginBtn.addEventListener('click', async () => {
@@ -224,21 +226,63 @@ if (logoutBtn) {
   });
 }
 
-function actualizarDashboard() {
-  const total = equiposGlobal.length;
+function actualizarDashboard(data) {
+  document.getElementById("totalEquipos").innerText = data.length;
 
-  const necesitan = equiposGlobal.filter(
-    e => e.necesitaMantenimiento === "Sí"
-  ).length;
+  const mantenimiento = data.filter(e => e.necesitaMantenimiento === "Sí");
+  const noMantenimiento = data.filter(e => e.necesitaMantenimiento === "No");
 
-  const noNecesitan = total - necesitan;
+  document.getElementById("equiposMantenimiento").innerText = mantenimiento.length;
+  document.getElementById("equiposOk").innerText = noMantenimiento.length;
 
-  const oficinasUnicas = new Set(
-    equiposGlobal.map(e => e.oficina)
-  ).size;
+  const oficinas = {};
+  data.forEach(e => {
+    if (!oficinas[e.oficina]) {
+      oficinas[e.oficina] = 0;
+    }
+    oficinas[e.oficina]++;
+  });
 
-  document.getElementById("totalEquipos").textContent = total;
-  document.getElementById("equiposMantenimiento").textContent = necesitan;
-  document.getElementById("equiposOk").textContent = noNecesitan;
-  document.getElementById("totalOficinas").textContent = oficinasUnicas;
+  document.getElementById("totalOficinas").innerText = Object.keys(oficinas).length;
+
+  actualizarGraficas(mantenimiento.length, noMantenimiento.length, oficinas);
+}
+
+function actualizarGraficas(mant, noMant, oficinas) {
+
+  // Destruir gráficas anteriores si existen
+  if (chartMantenimiento) chartMantenimiento.destroy();
+  if (chartOficinas) chartOficinas.destroy();
+
+  const ctxMant = document.getElementById("chartMantenimiento");
+  const ctxOfic = document.getElementById("chartOficinas");
+
+  chartMantenimiento = new Chart(ctxMant, {
+    type: "doughnut",
+    data: {
+      labels: ["Necesitan", "No necesitan"],
+      datasets: [{
+        data: [mant, noMant],
+        backgroundColor: ["#ffc107", "#198754"]
+      }]
+    }
+  });
+
+  chartOficinas = new Chart(ctxOfic, {
+    type: "bar",
+    data: {
+      labels: Object.keys(oficinas),
+      datasets: [{
+        label: "Cantidad de equipos",
+        data: Object.values(oficinas),
+        backgroundColor: "#0d6efd"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
 }
