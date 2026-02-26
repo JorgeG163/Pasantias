@@ -258,32 +258,37 @@ function actualizarGraficas(mant, noMant, oficinas) {
   const ctxMant = document.getElementById("chartMantenimiento");
   const ctxOfic = document.getElementById("chartOficinas");
 
-  chartMantenimiento = new Chart(ctxMant, {
+    chartMantenimiento = new Chart(ctxMant, {
     type: "doughnut",
     data: {
-      labels: ["Necesitan", "No necesitan"],
-      datasets: [{
+        labels: ["Necesitan", "No necesitan"],
+        datasets: [{
         data: [mant, noMant],
         backgroundColor: ["#ffc107", "#198754"]
-      }]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
     }
-  });
+    });
 
-  chartOficinas = new Chart(ctxOfic, {
+    chartOficinas = new Chart(ctxOfic, {
     type: "bar",
     data: {
-      labels: Object.keys(oficinas),
-      datasets: [{
+        labels: Object.keys(oficinas),
+        datasets: [{
         label: "Cantidad de equipos",
         data: Object.values(oficinas),
         backgroundColor: "#0d6efd"
-      }]
+        }]
     },
     options: {
-      responsive: true,
-      plugins: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
         legend: { display: false }
-      }
+        }
     }
-  });
+    });
 }

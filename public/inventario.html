@@ -15,6 +15,12 @@
       font-family: 'Segoe UI', sans-serif;
     }
 
+    .chart-container {
+    position: relative;
+    height: 300px;   /* Ajusta si quieres más pequeño */
+    max-height: 350px;
+    }
+
     .main-box {
     background: white;
     padding: 25px;
@@ -86,7 +92,12 @@
 <div class="container-fluid px-4 mt-4">
 
     <div class="main-box">
-  <h1>Inventario de equipos</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Inventario de equipos</h1>
+    <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+    Cerrar sesión
+    </button>
+    </div>
 
   <!-- FILTROS -->
   <div class="row filters">
@@ -140,8 +151,6 @@
     </table>
   </div>
 
-  <button id="logoutBtn" class="btn btn-danger w-100 mt-3">Cerrar sesión</button>
-
 </div>
 
 <div class="row mb-4 text-center" id="dashboard">
@@ -187,7 +196,9 @@
     <div class="card shadow-sm">
       <div class="card-body">
         <h5 class="text-center">Estado de Mantenimiento</h5>
+        <div class="chart-container">
         <canvas id="chartMantenimiento"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -196,7 +207,9 @@
     <div class="card shadow-sm">
       <div class="card-body">
         <h5 class="text-center">Equipos por Oficina</h5>
+        <div class="chart-container">
         <canvas id="chartOficinas"></canvas>
+        </div>
       </div>
     </div>
   </div>
