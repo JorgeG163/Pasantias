@@ -90,20 +90,16 @@
       margin-bottom: 20px;
     }
 
-    .btn-sm {
-      padding: 3px 8px;
-      font-size: 12px;
-    }
   </style>
 </head>
 
 <body>
-<div class="container-fluid px-4 mt-4">
+<div class="container mt-4">
+  <div class="main-box">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Inventario de equipos</h2>
 
-    <div class="position-relative mb-3">
-    <h1 class="text-center mb-0">Inventario de equipos</h1>
-
-    <button id="logoutBtn" class="btn btn-danger btn-sm logout-btn">
+    <button id="logoutBtn" class="btn btn-danger btn-sm px-3">
         Cerrar sesión
     </button>
     </div>
@@ -218,6 +214,8 @@
         <h5 class="text-center">Equipos por Oficina</h5>
         <div class="chart-container">
         <canvas id="chartOficinas"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>
