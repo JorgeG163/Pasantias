@@ -51,6 +51,9 @@ const filterOffice = document.getElementById("filterOffice");
 const filterMaintenance = document.getElementById("filterMaintenance");
 
 let equiposGlobal = [];
+let equiposFiltrados = []; // registros después de aplicar filtros
+let paginaActual = 1;      // página inicial
+const filasPorPagina = 10; // número de filas por página
 
 // Cargar inventario
 async function cargarInventario() {
@@ -91,151 +94,136 @@ function cargarOficinas() {
 }
 
 // Renderizar tabla
-function renderTabla(data) {
+function renderTablaPaginada() {
   if (!equiposTable) return;
 
   equiposTable.innerHTML = '';
 
-  data.forEach(eq => {
+  const inicio = (paginaActual - 1) * filasPorPagina;
+  const fin = inicio + filasPorPagina;
+  const registrosPagina = equiposFiltrados.slice(inicio, fin);
+
+  registrosPagina.forEach(eq => {
     const tr = document.createElement("tr");
 
     if (eq.necesitaMantenimiento === "Sí") {
-    tr.classList.add("needs-maintenance");
+      tr.classList.add("needs-maintenance");
     }
 
     let mantenimientoBadge = "";
 
     if (eq.necesitaMantenimiento === "Sí") {
-    mantenimientoBadge = `
+      mantenimientoBadge = `
         <span class="badge bg-danger">
         Necesita mantenimiento
         </span>
-    `;
+      `;
     } else if (eq.necesitaMantenimiento === "No") {
-    mantenimientoBadge = `
+      mantenimientoBadge = `
         <span class="badge bg-success">
         No necesita
         </span>
-    `;
+      `;
     }
 
     tr.innerHTML = `
-    <td>${eq.codigoTorre}</td>
-    <td>${eq.codigoPantalla}</td>
-    <td>${eq.codigoTeclado}</td>
-    <td>${eq.codigoMouse}</td>
-    <td>${eq.oficina}</td>
-    <td>${eq.tieneMantenimiento || ''}</td>
-    <td>${eq.ultimoMantenimiento || ''}</td>
-    <td>${eq.detalleMantenimientoPrevio || ''}</td>
-    <td>${mantenimientoBadge}</td>
-    <td>${eq.detalleMantenimiento || ''}</td>
-    <td>${eq.comentario || ''}</td>
-    <td>${eq.nombreDispositivo}</td>
-    <td>${eq.procesador}</td>
-    <td>${eq.ramInstalada}</td>
-    <td>${eq.discoDuro}</td>
-    <td>${eq.sistemaOperativo}</td>
-    <td>${eq.direccionIP}</td>
-    <td>${eq.fecha || ''}</td>
-    <td>
-        <button class="btn btn-warning btn-sm edit-btn">Editar</button>
-        <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
-        <button class="btn btn-secondary btn-sm pdf-btn">PDF</button>
-    </td>
+      <td>${eq.codigoTorre}</td>
+      <td>${eq.codigoPantalla}</td>
+      <td>${eq.codigoTeclado}</td>
+      <td>${eq.codigoMouse}</td>
+      <td>${eq.oficina}</td>
+      <td>${eq.tieneMantenimiento || ''}</td>
+      <td>${eq.ultimoMantenimiento || ''}</td>
+      <td>${eq.detalleMantenimientoPrevio || ''}</td>
+      <td>${mantenimientoBadge}</td>
+      <td>${eq.detalleMantenimiento || ''}</td>
+      <td>${eq.comentario || ''}</td>
+      <td>${eq.nombreDispositivo}</td>
+      <td>${eq.procesador}</td>
+      <td>${eq.ramInstalada}</td>
+      <td>${eq.discoDuro}</td>
+      <td>${eq.sistemaOperativo}</td>
+      <td>${eq.direccionIP}</td>
+      <td>${eq.fecha || ''}</td>
+      <td>
+          <button class="btn btn-warning btn-sm edit-btn">Editar</button>
+          <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
+          <button class="btn btn-secondary btn-sm pdf-btn">PDF</button>
+      </td>
     `;
 
-tr.querySelector(".delete-btn").addEventListener("click", async () => {
-  if (!confirm("¿Eliminar este equipo definitivamente?")) return;
+    // Eventos de botones
+    tr.querySelector(".delete-btn").addEventListener("click", async () => {
+      if (!confirm("¿Eliminar este equipo definitivamente?")) return;
+      const token = localStorage.getItem("token");
 
-  const token = localStorage.getItem("token");
+      try {
+        const res = await fetch(`${API_URL}/inventario/${eq.id}`, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
 
-  try {
-    const res = await fetch(`${API_URL}/inventario/${eq.id}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}`
+        if (!res.ok) throw new Error("Error al eliminar");
+
+        equiposGlobal = equiposGlobal.filter(e => e.id !== eq.id);
+        aplicarFiltros();
+        actualizarDashboard(equiposFiltrados);
+
+      } catch (error) {
+        alert("Error al eliminar en el servidor");
+        console.error(error);
       }
     });
 
-    if (!res.ok) throw new Error("Error al eliminar");
+    tr.querySelector(".pdf-btn").addEventListener("click", async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return alert('Usuario no autenticado');
 
-    // Eliminar de array local
-    equiposGlobal = equiposGlobal.filter(e => e.id !== eq.id);
+      try {
+        const res = await fetch(`${API_URL}/generar-solicitud/${eq.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-    aplicarFiltros(); // vuelve a renderizar
-    actualizarDashboard(); // actualiza estadísticas
+        if (!res.ok) {
+          const errorData = await res.json();
+          return alert(`Error: ${errorData.error}`);
+        }
 
-  } catch (error) {
-    alert("Error al eliminar en el servidor");
-    console.error(error);
-  }
-});
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
 
-tr.querySelector(".pdf-btn").addEventListener("click", async () => {
-  const token = localStorage.getItem("token");
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Solicitud_${eq.codigoTorre}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
 
-  if (!token) {
-    alert('Usuario no autenticado');
-    return;
-  }
-
-  try {
-    // Llamada al servidor con token en headers
-    const res = await fetch(`${API_URL}/generar-solicitud/${eq.id}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      } catch (err) {
+        console.error(err);
+        alert('Error al generar el PDF');
+      }
     });
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      alert(`Error: ${errorData.error}`);
-      return;
-    }
-
-    // Convertir la respuesta en Blob (archivo)
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    // Crear un enlace temporal para descargar
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Solicitud_${eq.codigoTorre}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-
-    // Limpiar URL y enlace
-    window.URL.revokeObjectURL(url);
-    a.remove();
-
-  } catch (err) {
-    console.error(err);
-    alert('Error al generar el PDF');
-  }
-});
-
-    // EDITAR en línea
+    // Editar en línea
     tr.querySelector(".edit-btn").addEventListener("click", function () {
       const celdas = tr.querySelectorAll("td");
       const boton = this;
 
       if (boton.textContent === "Editar") {
-
         for (let i = 0; i < celdas.length - 1; i++) {
           const valor = celdas[i].textContent;
           celdas[i].innerHTML = `<input class="form-control form-control-sm" value="${valor}">`;
         }
-
         boton.textContent = "Guardar";
         boton.classList.remove("btn-warning");
         boton.classList.add("btn-success");
-
       } else {
-
         const inputs = tr.querySelectorAll("input");
         inputs.forEach((input, index) => {
           celdas[index].textContent = input.value;
         });
-
         boton.textContent = "Editar";
         boton.classList.remove("btn-success");
         boton.classList.add("btn-warning");
@@ -244,29 +232,32 @@ tr.querySelector(".pdf-btn").addEventListener("click", async () => {
 
     equiposTable.appendChild(tr);
   });
+
+  generarBotonesPagina(); // nueva función para los botones
 }
 
-// Aplicar filtros
-function aplicarFiltros() {
-  let filtrados = equiposGlobal;
+function generarBotonesPagina() {
+  const contenedor = document.getElementById("paginacion");
+  if (!contenedor) return;
 
-  if (searchInput && searchInput.value) {
-    filtrados = filtrados.filter(e =>
-      e.codigoTorre.toLowerCase().includes(searchInput.value.toLowerCase()) ||
-      e.nombreDispositivo.toLowerCase().includes(searchInput.value.toLowerCase())
-    );
+  contenedor.innerHTML = '';
+
+  const totalPaginas = Math.ceil(equiposFiltrados.length / filasPorPagina);
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.classList.add("btn", "btn-sm", "me-1");
+    if (i === paginaActual) btn.classList.add("btn-primary");
+    else btn.classList.add("btn-outline-primary");
+
+    btn.addEventListener("click", () => {
+      paginaActual = i;
+      renderTablaPaginada();
+    });
+
+    contenedor.appendChild(btn);
   }
-
-  if (filterOffice && filterOffice.value) {
-    filtrados = filtrados.filter(e => e.oficina === filterOffice.value);
-  }
-
-  if (filterMaintenance && filterMaintenance.value) {
-    filtrados = filtrados.filter(e => e.necesitaMantenimiento === filterMaintenance.value);
-  }
-
-  renderTabla(filtrados);
-  actualizarDashboard(filtrados);
 }
 
 // Eventos filtros
