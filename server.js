@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { google } = require('googleapis');
+const PDFDocument = require("pdfkit");
 
 const app = express();
 app.use(cors());
@@ -167,5 +168,66 @@ app.delete('/inventario/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al eliminar equipo" });
+  }
+});
+
+
+
+app.get("/generar-solicitud/:id", async (req, res) => {
+  try {
+    const equipoId = req.params.id;
+
+    // Aquí debes buscar el equipo en tu base de datos
+    const equipo = await Inventario.findByPk(equipoId); 
+    // Ajusta según tu modelo (Mongo, MySQL, etc.)
+
+    if (!equipo) {
+      return res.status(404).json({ error: "Equipo no encontrado" });
+    }
+
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Solicitud_${equipo.codigoTorre}.pdf`
+    );
+
+    doc.pipe(res);
+
+    // ---------------- ENCABEZADO ----------------
+    doc.fontSize(16).text("SOLICITUD SOPORTE TÉCNICO", {
+      align: "center",
+    });
+
+    doc.moveDown();
+    doc.fontSize(10);
+    doc.text(`Código equipo: ${equipo.codigoTorre}`);
+    doc.text(`Oficina: ${equipo.oficina}`);
+    doc.text(`Equipo: ${equipo.nombreDispositivo}`);
+    doc.text(`IP: ${equipo.direccionIP}`);
+    doc.text(`Procesador: ${equipo.procesador}`);
+    doc.text(`RAM: ${equipo.ramInstalada}`);
+    doc.text(`Fecha: ${new Date().toLocaleDateString()}`);
+
+    doc.moveDown();
+
+    // ---------------- DESCRIPCIÓN ----------------
+    doc.text("Descripción del problema:");
+    doc.rect(doc.x, doc.y + 5, 500, 100).stroke();
+
+    doc.moveDown(8);
+
+    // ---------------- FIRMAS ----------------
+    doc.moveDown(4);
+    doc.text("Firma solicitante: _____________________________");
+    doc.moveDown();
+    doc.text("Firma soporte técnico: _____________________________");
+
+    doc.end();
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al generar PDF" });
   }
 });

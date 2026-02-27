@@ -141,6 +141,7 @@ function renderTabla(data) {
     <td>
         <button class="btn btn-warning btn-sm edit-btn">Editar</button>
         <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
+        <button class="btn btn-secondary btn-sm pdf-btn">PDF</button>
     </td>
     `;
 
@@ -169,6 +170,15 @@ tr.querySelector(".delete-btn").addEventListener("click", async () => {
     alert("Error al eliminar en el servidor");
     console.error(error);
   }
+});
+
+tr.querySelector(".pdf-btn").addEventListener("click", () => {
+  const token = localStorage.getItem("token");
+
+  window.open(
+    `${API_URL}/generar-solicitud/${eq.id}`,
+    "_blank"
+  );
 });
 
     // EDITAR en línea
@@ -258,7 +268,7 @@ if (refreshBtn) {
     refreshBtn.disabled = false;
 
     refreshBtn.innerHTML = `
-      🔄 Actualizar
+      Actualizar
     `;
   });
 }
