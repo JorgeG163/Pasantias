@@ -68,7 +68,18 @@ async function cargarInventario() {
     equiposGlobal = await res.json();
 
     if (filterOffice) cargarOficinas();
-    equiposFiltrados = [...equiposGlobal]; // inicializa filtrados
+
+    // --------------- FILTRAR POR QR SI VIENE ID -----------------
+    const urlParams = new URLSearchParams(window.location.search);
+    const idEquipo = urlParams.get('id');
+
+    if (idEquipo) {
+      equiposFiltrados = equiposGlobal.filter(e => e.id === idEquipo);
+    } else {
+      equiposFiltrados = [...equiposGlobal];
+    }
+    // -----------------------------------------------------------
+
     renderTablaPaginada();
     actualizarDashboard(equiposGlobal);
 
@@ -150,6 +161,7 @@ function renderTablaPaginada() {
           <button class="btn btn-warning btn-sm edit-btn">Editar</button>
           <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
           <button class="btn btn-secondary btn-sm pdf-btn">PDF</button>
+          <button class="btn btn-info btn-sm qr-btn">QR</button>
       </td>
     `;
 
@@ -205,6 +217,26 @@ function renderTablaPaginada() {
         console.error(err);
         alert('Error al generar el PDF');
       }
+    });
+
+    // Botón QR
+    tr.querySelector(".qr-btn").addEventListener("click", () => {
+    const qrContainer = document.getElementById("qrcode");
+    qrContainer.innerHTML = ""; // limpiar QR anterior
+
+    const url = `${window.location.origin}/inventario.html?id=${eq.id}`;
+    new QRCode(qrContainer, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+
+    // Mostrar modal
+    const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+    qrModal.show();
     });
 
     // Editar en línea
