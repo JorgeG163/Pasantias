@@ -29,8 +29,10 @@ if (loginBtn) {
       const data = await res.json();
 
       if (data.token) {
+        // Guardar token
         localStorage.setItem('token', data.token);
-        window.location.href = 'inventario.html';
+        // Redirigir a la ruta protegida
+        window.location.href = '/inventario';
       } else {
         statusDiv.textContent = 'Usuario o contraseña incorrectos';
       }
@@ -61,8 +63,8 @@ async function cargarInventario() {
   if (!token) return window.location.href = 'index.html';
 
   try {
-    const res = await fetch(`${API_URL}/inventario`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+    const res = await fetch(`${API_URL}/inventario-datos`, {
+    headers: { 'Authorization': `Bearer ${token}` }
     });
 
     equiposGlobal = await res.json();
@@ -273,8 +275,7 @@ if (equiposTable) cargarInventario();
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('token');
-    window.location.href = 'index.html';
-  });
+    window.location.href = '/';  });
 }
 
 if (refreshBtn) {
