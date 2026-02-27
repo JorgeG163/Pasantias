@@ -99,34 +99,50 @@ function renderTabla(data) {
   data.forEach(eq => {
     const tr = document.createElement("tr");
 
-    if (eq.necesitaMantenimiento === "Sí") {
-      tr.classList.add("needs-maintenance");
-    }
+if (eq.necesitaMantenimiento === "Sí") {
+  tr.classList.add("needs-maintenance");
+}
 
-    tr.innerHTML = `
-      <td>${eq.codigoTorre}</td>
-      <td>${eq.codigoPantalla}</td>
-      <td>${eq.codigoTeclado}</td>
-      <td>${eq.codigoMouse}</td>
-      <td>${eq.oficina}</td>
-      <td>${eq.tieneMantenimiento || ''}</td>
-      <td>${eq.ultimoMantenimiento || ''}</td>
-      <td>${eq.detalleMantenimientoPrevio || ''}</td>
-      <td>${eq.necesitaMantenimiento || ''}</td>
-      <td>${eq.detalleMantenimiento || ''}</td>
-      <td>${eq.comentario || ''}</td>
-      <td>${eq.nombreDispositivo}</td>
-      <td>${eq.procesador}</td>
-      <td>${eq.ramInstalada}</td>
-      <td>${eq.discoDuro}</td>
-      <td>${eq.sistemaOperativo}</td>
-      <td>${eq.direccionIP}</td>
-      <td>${eq.fecha || ''}</td>
-      <td>
-        <button class="btn btn-warning btn-sm edit-btn">Editar</button>
-        <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
-      </td>
-    `;
+let mantenimientoBadge = "";
+
+if (eq.necesitaMantenimiento === "Sí") {
+  mantenimientoBadge = `
+    <span class="badge bg-danger">
+      Necesita mantenimiento
+    </span>
+  `;
+} else if (eq.necesitaMantenimiento === "No") {
+  mantenimientoBadge = `
+    <span class="badge bg-success">
+      No necesita
+    </span>
+  `;
+}
+
+tr.innerHTML = `
+  <td>${eq.codigoTorre}</td>
+  <td>${eq.codigoPantalla}</td>
+  <td>${eq.codigoTeclado}</td>
+  <td>${eq.codigoMouse}</td>
+  <td>${eq.oficina}</td>
+  <td>${eq.tieneMantenimiento || ''}</td>
+  <td>${eq.ultimoMantenimiento || ''}</td>
+  <td>${eq.detalleMantenimientoPrevio || ''}</td>
+  <td>${mantenimientoBadge}</td>
+  <td>${eq.detalleMantenimiento || ''}</td>
+  <td>${eq.comentario || ''}</td>
+  <td>${eq.nombreDispositivo}</td>
+  <td>${eq.procesador}</td>
+  <td>${eq.ramInstalada}</td>
+  <td>${eq.discoDuro}</td>
+  <td>${eq.sistemaOperativo}</td>
+  <td>${eq.direccionIP}</td>
+  <td>${eq.fecha || ''}</td>
+  <td>
+    <button class="btn btn-warning btn-sm edit-btn">Editar</button>
+    <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
+  </td>
+`;
 
 tr.querySelector(".delete-btn").addEventListener("click", async () => {
   if (!confirm("¿Eliminar este equipo definitivamente?")) return;
