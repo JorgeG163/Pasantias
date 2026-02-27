@@ -60,17 +60,30 @@ const filasPorPagina = 10; // número de filas por página
 // Cargar inventario
 async function cargarInventario() {
   const token = localStorage.getItem('token');
-  if (!token) return window.location.href = 'index.html';
+  console.log("Token en cargarInventario:", token); // DEBUG
+
+  if (!token) {
+    // Redirige a login si no hay token
+    window.location.href = '/';
+    return;
+  }
 
   try {
     const res = await fetch(`${API_URL}/inventario-datos`, {
-    headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
+
+    if (res.status === 401) {
+      alert("Token inválido o expirado, por favor inicie sesión de nuevo.");
+      localStorage.removeItem('token');
+      window.location.href = '/';
+      return;
+    }
 
     equiposGlobal = await res.json();
 
     if (filterOffice) cargarOficinas();
-    equiposFiltrados = [...equiposGlobal]; // inicializa filtrados
+    equiposFiltrados = [...equiposGlobal];
     renderTablaPaginada();
     actualizarDashboard(equiposGlobal);
 
