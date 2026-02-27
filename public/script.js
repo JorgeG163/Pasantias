@@ -79,7 +79,10 @@ async function cargarInventario() {
       return;
     }
 
-    equiposGlobal = await res.json();
+    equiposGlobal = (await res.json()).map(e => ({
+    ...e,
+    necesitaMantenimiento: e.necesitaMantenimiento ? String(e.necesitaMantenimiento).trim() : "No"
+}));
     console.log("Datos inventario:", equiposGlobal); // <-- LOG: datos recibidos
 
     if (!Array.isArray(equiposGlobal) || equiposGlobal.length === 0) {
@@ -99,7 +102,7 @@ async function cargarInventario() {
       equiposFiltrados = equiposGlobal.filter(e => e.id === idEquipo);
       console.log("Equipos filtrados por ID:", equiposFiltrados); // <-- LOG: filtrado por QR
     } else {
-      equiposFiltrados = [...equiposGlobal];
+      equiposFiltrados = equiposGlobal.length ? [...equiposGlobal] : [];
       console.log("Equipos filtrados (todos):", equiposFiltrados); // <-- LOG: todos
     }
 
@@ -168,6 +171,11 @@ function renderTablaPaginada() {
   const inicio = (paginaActual - 1) * filasPorPagina;
   const fin = inicio + filasPorPagina;
   const registrosPagina = equiposFiltrados.slice(inicio, fin);
+
+  if (registrosPagina.length === 0) {
+  equiposTable.innerHTML = `<tr><td colspan="18">No hay registros para mostrar</td></tr>`;
+  return;
+}
 
   registrosPagina.forEach(eq => {
     const tr = document.createElement("tr");
