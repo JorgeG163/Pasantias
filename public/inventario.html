@@ -11,14 +11,6 @@
 
   <style>
 
-    .logout-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 4px 10px;
-    font-size: 12px;
-    }
-
     body {
       background: #f4f6f9;
       font-family: 'Segoe UI', sans-serif;
@@ -94,15 +86,17 @@
 </head>
 
 <body>
-<div class="container mt-4">
-  <div class="main-box">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Inventario de equipos</h2>
-
-    <button id="logoutBtn" class="btn btn-danger btn-sm px-3">
-        Cerrar sesión
-    </button>
+<div class="container-fluid px-4 mt-4">
+    <div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="mb-0">Inventario de equipos</h2>
     </div>
+    <div class="col-auto">
+        <button id="logoutBtn" class="btn btn-danger btn-sm">
+        Cerrar sesión
+        </button>
+    </div>
+</div>
 
   <!-- FILTROS -->
   <div class="row filters">
@@ -155,8 +149,6 @@
       <tbody></tbody>
     </table>
   </div>
-
-</div>
 
 <div class="row mt-5 mb-4 text-center" id="dashboard">
   <div class="col-md-3 mb-2">
@@ -214,13 +206,12 @@
         <h5 class="text-center">Equipos por Oficina</h5>
         <div class="chart-container">
         <canvas id="chartOficinas"></canvas>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
-</div>
+</div> <!-- cierre row -->
+
+</div> <!-- cierre container-fluid -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>

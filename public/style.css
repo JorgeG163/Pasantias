@@ -20,13 +20,11 @@ h1 {
   color: #333;
 }
 
-input, button {
+.container input,
+.container button {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
 }
 
 button {
