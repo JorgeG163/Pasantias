@@ -68,7 +68,8 @@ async function cargarInventario() {
     equiposGlobal = await res.json();
 
     if (filterOffice) cargarOficinas();
-    renderTabla(equiposGlobal);
+    equiposFiltrados = [...equiposGlobal]; // inicializa filtrados
+    renderTablaPaginada();
     actualizarDashboard(equiposGlobal);
 
   } catch (err) {
@@ -360,4 +361,30 @@ function actualizarGraficas(mant, noMant, oficinas) {
         }
     }
     });
+}
+
+function aplicarFiltros() {
+  if (!equiposGlobal || equiposGlobal.length === 0) return;
+
+  let filtrados = [...equiposGlobal];
+
+  if (searchInput && searchInput.value) {
+    filtrados = filtrados.filter(e =>
+      (e.codigoTorre || '').toLowerCase().includes(searchInput.value.toLowerCase()) ||
+      (e.nombreDispositivo || '').toLowerCase().includes(searchInput.value.toLowerCase())
+    );
+  }
+
+  if (filterOffice && filterOffice.value) {
+    filtrados = filtrados.filter(e => e.oficina === filterOffice.value);
+  }
+
+  if (filterMaintenance && filterMaintenance.value) {
+    filtrados = filtrados.filter(e => e.necesitaMantenimiento === filterMaintenance.value);
+  }
+
+  equiposFiltrados = filtrados;
+  paginaActual = 1; // reinicia página al aplicar filtro
+  renderTablaPaginada();
+  actualizarDashboard(filtrados);
 }
