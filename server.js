@@ -1,18 +1,18 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { google } = require('googleapis');
 const PDFDocument = require("pdfkit");
-
 const app = express();
+
+// --- MIDDLEWARES ---
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (CSS, JS, HTML)
+// --- Archivos públicos (solo login, CSS, JS públicos) ---
 app.use(express.static(path.join(__dirname, 'public')));
-
-const SPREADSHEET_ID = '1Spre-YvlqnUvXgUUOCEGbmO338GqekMGMwUmfeiEXEM';
 
 // --- Usuarios de prueba ---
 const USERS = [
@@ -41,8 +41,16 @@ function authMiddleware(req, res, next) {
   next();
 }
 
+// --- SERVIR PÁGINA DE INVENTARIO (PROTEGIDA) ---
+app.get('/inventario', authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private/inventario.html'));
+});
+
+// --- SPREADSHEET ---
+const SPREADSHEET_ID = '1Spre-YvlqnUvXgUUOCEGbmO338GqekMGMwUmfeiEXEM';
+
 // --- GUARDAR INVENTARIO ---
-app.post('/inventario', async (req, res) => {
+app.post('/inventario', authMiddleware, async (req, res) => {
   try {
     const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
     const auth = new google.auth.GoogleAuth({
@@ -90,8 +98,8 @@ app.post('/inventario', async (req, res) => {
   }
 });
 
-// --- OBTENER INVENTARIO (solo para usuarios autenticados) ---
-app.get('/inventario', authMiddleware, async (req, res) => {
+// --- OBTENER INVENTARIO (solo usuarios autenticados) ---
+app.get('/inventario-datos', authMiddleware, async (req, res) => {
   try {
     const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
     const auth = new google.auth.GoogleAuth({
@@ -103,33 +111,33 @@ app.get('/inventario', authMiddleware, async (req, res) => {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'Pasantias!A2:R', // Ajustado a las nuevas columnas
+      range: 'Pasantias!A2:R',
     });
 
-const rows = response.data.values || [];
-const datos = rows.map((row, index) => ({
-  id: index + 2, 
-  codigoTorre: row[0],
-  codigoPantalla: row[1],
-  codigoTeclado: row[2],
-  codigoMouse: row[3],
-  oficina: row[4],
-  tieneMantenimiento: row[5],
-  ultimoMantenimiento: row[6],
-  detalleMantenimientoPrevio: row[7],
-  necesitaMantenimiento: row[8],
-  detalleMantenimiento: row[9],
-  comentario: row[10],
-  nombreDispositivo: row[11],
-  procesador: row[12],
-  ramInstalada: row[13],
-  discoDuro: row[14],
-  sistemaOperativo: row[15],
-  direccionIP: row[16],
-  fecha: row[17]
-}));
+    const rows = response.data.values || [];
+    const datos = rows.map((row, index) => ({
+      id: index + 2, 
+      codigoTorre: row[0],
+      codigoPantalla: row[1],
+      codigoTeclado: row[2],
+      codigoMouse: row[3],
+      oficina: row[4],
+      tieneMantenimiento: row[5],
+      ultimoMantenimiento: row[6],
+      detalleMantenimientoPrevio: row[7],
+      necesitaMantenimiento: row[8],
+      detalleMantenimiento: row[9],
+      comentario: row[10],
+      nombreDispositivo: row[11],
+      procesador: row[12],
+      ramInstalada: row[13],
+      discoDuro: row[14],
+      sistemaOperativo: row[15],
+      direccionIP: row[16],
+      fecha: row[17]
+    }));
 
-res.json(datos);
+    res.json(datos);
 
   } catch (err) {
     console.error(err);
@@ -137,14 +145,7 @@ res.json(datos);
   }
 });
 
-// --- SERVIR LA PÁGINA PRINCIPAL ---
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Servidor corriendo en puerto', PORT));
-
+// --- ELIMINAR EQUIPO ---
 app.delete('/inventario/:id', authMiddleware, async (req, res) => {
   try {
     const fila = parseInt(req.params.id);
@@ -171,8 +172,7 @@ app.delete('/inventario/:id', authMiddleware, async (req, res) => {
   }
 });
 
-
-
+// --- GENERAR PDF DE SOLICITUD ---
 app.get("/generar-solicitud/:id", authMiddleware, async (req, res) => {
   try {
     const fila = parseInt(req.params.id);
@@ -229,9 +229,7 @@ app.get("/generar-solicitud/:id", authMiddleware, async (req, res) => {
     doc.pipe(res);
 
     // ---------------- ENCABEZADO ----------------
-    doc.fontSize(16).text("SOLICITUD SOPORTE TÉCNICO", {
-      align: "center",
-    });
+    doc.fontSize(16).text("SOLICITUD SOPORTE TÉCNICO", { align: "center" });
 
     doc.moveDown();
     doc.fontSize(10);
@@ -245,12 +243,10 @@ app.get("/generar-solicitud/:id", authMiddleware, async (req, res) => {
     doc.text(`Fecha: ${new Date().toLocaleDateString()}`);
 
     doc.moveDown();
-
     doc.text("Descripción del problema:");
     doc.rect(doc.x, doc.y + 5, 500, 100).stroke();
 
     doc.moveDown(8);
-
     doc.moveDown(4);
     doc.text("Firma solicitante: _____________________________");
     doc.moveDown();
@@ -263,3 +259,11 @@ app.get("/generar-solicitud/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Error al generar PDF" });
   }
 });
+
+// --- SERVIR PÁGINA PRINCIPAL (login) ---
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('Servidor corriendo en puerto', PORT));

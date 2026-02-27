@@ -149,7 +149,7 @@ function renderTablaPaginada() {
       <td>
           <button class="btn btn-warning btn-sm edit-btn">Editar</button>
           <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
-          <button class="btn btn-secondary btn-sm pdf-btn">PDF</button>}
+          <button class="btn btn-secondary btn-sm pdf-btn">PDF</button
       </td>
     `;
 
