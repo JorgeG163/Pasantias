@@ -172,13 +172,45 @@ tr.querySelector(".delete-btn").addEventListener("click", async () => {
   }
 });
 
-tr.querySelector(".pdf-btn").addEventListener("click", () => {
+tr.querySelector(".pdf-btn").addEventListener("click", async () => {
   const token = localStorage.getItem("token");
 
-  window.open(
-    `${API_URL}/generar-solicitud/${eq.id}`,
-    "_blank"
-  );
+  if (!token) {
+    alert('Usuario no autenticado');
+    return;
+  }
+
+  try {
+    // Llamada al servidor con token en headers
+    const res = await fetch(`${API_URL}/generar-solicitud/${eq.id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      alert(`Error: ${errorData.error}`);
+      return;
+    }
+
+    // Convertir la respuesta en Blob (archivo)
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    // Crear un enlace temporal para descargar
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Solicitud_${eq.codigoTorre}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+
+    // Limpiar URL y enlace
+    window.URL.revokeObjectURL(url);
+    a.remove();
+
+  } catch (err) {
+    console.error(err);
+    alert('Error al generar el PDF');
+  }
 });
 
     // EDITAR en línea
