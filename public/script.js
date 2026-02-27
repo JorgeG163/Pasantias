@@ -29,10 +29,8 @@ if (loginBtn) {
       const data = await res.json();
 
       if (data.token) {
-        // Guardar token
         localStorage.setItem('token', data.token);
-        // Redirigir a la ruta protegida
-        window.location.href = '/inventario';
+        window.location.href = 'inventario.html';
       } else {
         statusDiv.textContent = 'Usuario o contraseña incorrectos';
       }
@@ -60,30 +58,17 @@ const filasPorPagina = 10; // número de filas por página
 // Cargar inventario
 async function cargarInventario() {
   const token = localStorage.getItem('token');
-  console.log("Token en cargarInventario:", token); // DEBUG
-
-  if (!token) {
-    // Redirige a login si no hay token
-    window.location.href = '/';
-    return;
-  }
+  if (!token) return window.location.href = 'index.html';
 
   try {
-    const res = await fetch(`${API_URL}/inventario-datos`, {
+    const res = await fetch(`${API_URL}/inventario`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-
-    if (res.status === 401) {
-      alert("Token inválido o expirado, por favor inicie sesión de nuevo.");
-      localStorage.removeItem('token');
-      window.location.href = '/';
-      return;
-    }
 
     equiposGlobal = await res.json();
 
     if (filterOffice) cargarOficinas();
-    equiposFiltrados = [...equiposGlobal];
+    equiposFiltrados = [...equiposGlobal]; // inicializa filtrados
     renderTablaPaginada();
     actualizarDashboard(equiposGlobal);
 
@@ -164,7 +149,7 @@ function renderTablaPaginada() {
       <td>
           <button class="btn btn-warning btn-sm edit-btn">Editar</button>
           <button class="btn btn-danger btn-sm delete-btn">Borrar</button>
-          <button class="btn btn-secondary btn-sm pdf-btn">PDF</button
+          <button class="btn btn-secondary btn-sm pdf-btn">PDF</button>
       </td>
     `;
 
@@ -288,7 +273,8 @@ if (equiposTable) cargarInventario();
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('token');
-    window.location.href = '/';  });
+    window.location.href = 'index.html';
+  });
 }
 
 if (refreshBtn) {
