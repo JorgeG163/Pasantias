@@ -58,35 +58,57 @@ const filasPorPagina = 10; // número de filas por página
 // Cargar inventario
 async function cargarInventario() {
   const token = localStorage.getItem('token');
-  if (!token) return window.location.href = 'index.html';
+  console.log("Token:", token); // <-- LOG: token
+
+  if (!token) {
+    console.warn("No hay token, redirigiendo a login...");
+    if (equiposTable) {
+      equiposTable.innerHTML = `<tr><td colspan="18">No autenticado</td></tr>`;
+    }
+    return window.location.href = 'index.html';
+  }
 
   try {
     const res = await fetch(`${API_URL}/inventario`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
+    if (!res.ok) {
+      console.error("Error en fetch inventario:", res.status, res.statusText);
+      equiposTable.innerHTML = `<tr><td colspan="18">Error al cargar inventario (status ${res.status})</td></tr>`;
+      return;
+    }
+
     equiposGlobal = await res.json();
+    console.log("Datos inventario:", equiposGlobal); // <-- LOG: datos recibidos
+
+    if (!Array.isArray(equiposGlobal) || equiposGlobal.length === 0) {
+      console.warn("Inventario vacío");
+      equiposTable.innerHTML = `<tr><td colspan="18">No hay equipos registrados</td></tr>`;
+      return;
+    }
 
     if (filterOffice) cargarOficinas();
 
-    // --------------- FILTRAR POR QR SI VIENE ID -----------------
+    // ----------------- FILTRAR POR QR SI VIENE ID -----------------
     const urlParams = new URLSearchParams(window.location.search);
     const idEquipo = urlParams.get('id');
+    console.log("ID equipo desde URL:", idEquipo); // <-- LOG: id QR
 
     if (idEquipo) {
       equiposFiltrados = equiposGlobal.filter(e => e.id === idEquipo);
+      console.log("Equipos filtrados por ID:", equiposFiltrados); // <-- LOG: filtrado por QR
     } else {
       equiposFiltrados = [...equiposGlobal];
+      console.log("Equipos filtrados (todos):", equiposFiltrados); // <-- LOG: todos
     }
-    // -----------------------------------------------------------
 
     renderTablaPaginada();
     actualizarDashboard(equiposGlobal);
     destacarEquipoQR();
-    
 
   } catch (err) {
-    console.error(err);
+    console.error("Error cargando inventario:", err);
     if (equiposTable) {
       equiposTable.innerHTML = `<tr><td colspan="18">Error al cargar inventario</td></tr>`;
     }
@@ -299,13 +321,11 @@ function renderTablaPaginada() {
     equiposTable.appendChild(tr);
   });
 
-  generarBotonesPagina(); // nueva función para los botones
-    const urlParams = new URLSearchParams(window.location.search);
+  console.log("Tabla renderizada con éxito");
+  generarBotonesPagina();
+  const urlParams = new URLSearchParams(window.location.search);
   const idEquipo = urlParams.get('id');
-  if (idEquipo) {
-    // ponemos un pequeño delay para asegurar que el DOM esté listo
-    setTimeout(() => destacarEquipoQR(), 100);
-  }
+  if (idEquipo) setTimeout(() => destacarEquipoQR(), 100);
 }
 
 function generarBotonesPagina() {
