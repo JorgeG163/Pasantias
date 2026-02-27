@@ -300,6 +300,12 @@ function renderTablaPaginada() {
   });
 
   generarBotonesPagina(); // nueva función para los botones
+    const urlParams = new URLSearchParams(window.location.search);
+  const idEquipo = urlParams.get('id');
+  if (idEquipo) {
+    // ponemos un pequeño delay para asegurar que el DOM esté listo
+    setTimeout(() => destacarEquipoQR(), 100);
+  }
 }
 
 function generarBotonesPagina() {
