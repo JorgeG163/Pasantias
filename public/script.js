@@ -107,7 +107,7 @@ function destacarEquipoQR() {
       // Scroll hasta la fila
       filaEncontrada.scrollIntoView({ behavior: "smooth", block: "center" });
 
-      // Parpadeo 3 veces
+      // Parpadeo 3 vecesa
       let parpadeos = 0;
       const maxParpadeos = 6; // 6 toggles = 3 veces
       const interval = setInterval(() => {
