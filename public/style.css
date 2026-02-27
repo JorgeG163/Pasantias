@@ -39,7 +39,9 @@ button:hover {
 }
 
 .table-container {
-  overflow-x: auto;
+  overflow-x: auto;   /* scroll horizontal si es necesario */
+  max-height: 60vh;   /* límite vertical para la tabla */
+  overflow-y: auto;   /* scroll vertical si hay muchas filas */
 }
 
 table {

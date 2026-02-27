@@ -36,8 +36,9 @@
     }
 
     .table-container {
-    overflow-x: auto;
-    max-height: 75vh;
+    overflow-x: auto;   /* scroll horizontal si es necesario */
+    max-height: 60vh;   /* límite vertical para la tabla */
+    overflow-y: auto;   /* scroll vertical si hay muchas filas */
     }
 
     @media (min-width: 1200px) {
@@ -152,6 +153,8 @@
       <tbody></tbody>
     </table>
   </div>
+  
+  <div id="paginationContainer" class="mt-2 text-center"></div>
 
 <div class="row mt-5 mb-4 text-center" id="dashboard">
   <div class="col-md-3 mb-2">
