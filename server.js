@@ -173,17 +173,50 @@ app.delete('/inventario/:id', authMiddleware, async (req, res) => {
 
 
 
-app.get("/generar-solicitud/:id", async (req, res) => {
+app.get("/generar-solicitud/:id", authMiddleware, async (req, res) => {
   try {
-    const equipoId = req.params.id;
+    const fila = parseInt(req.params.id);
 
-    // Aquí debes buscar el equipo en tu base de datos
-    const equipo = await Inventario.findByPk(equipoId); 
-    // Ajusta según tu modelo (Mongo, MySQL, etc.)
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    });
 
-    if (!equipo) {
+    const client = await auth.getClient();
+    const sheets = google.sheets({ version: 'v4', auth: client });
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `Pasantias!A${fila}:R${fila}`
+    });
+
+    const row = response.data.values?.[0];
+
+    if (!row) {
       return res.status(404).json({ error: "Equipo no encontrado" });
     }
+
+    const equipo = {
+      codigoTorre: row[0],
+      codigoPantalla: row[1],
+      codigoTeclado: row[2],
+      codigoMouse: row[3],
+      oficina: row[4],
+      tieneMantenimiento: row[5],
+      ultimoMantenimiento: row[6],
+      detalleMantenimientoPrevio: row[7],
+      necesitaMantenimiento: row[8],
+      detalleMantenimiento: row[9],
+      comentario: row[10],
+      nombreDispositivo: row[11],
+      procesador: row[12],
+      ramInstalada: row[13],
+      discoDuro: row[14],
+      sistemaOperativo: row[15],
+      direccionIP: row[16],
+      fecha: row[17]
+    };
 
     const doc = new PDFDocument({ margin: 40, size: "A4" });
 
@@ -202,6 +235,7 @@ app.get("/generar-solicitud/:id", async (req, res) => {
 
     doc.moveDown();
     doc.fontSize(10);
+
     doc.text(`Código equipo: ${equipo.codigoTorre}`);
     doc.text(`Oficina: ${equipo.oficina}`);
     doc.text(`Equipo: ${equipo.nombreDispositivo}`);
@@ -212,13 +246,11 @@ app.get("/generar-solicitud/:id", async (req, res) => {
 
     doc.moveDown();
 
-    // ---------------- DESCRIPCIÓN ----------------
     doc.text("Descripción del problema:");
     doc.rect(doc.x, doc.y + 5, 500, 100).stroke();
 
     doc.moveDown(8);
 
-    // ---------------- FIRMAS ----------------
     doc.moveDown(4);
     doc.text("Firma solicitante: _____________________________");
     doc.moveDown();
