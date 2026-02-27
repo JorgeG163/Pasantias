@@ -45,7 +45,7 @@ if (loginBtn) {
 // ----------------- INVENTARIO -----------------
 const equiposTable = document.querySelector('#equiposTable tbody');
 const logoutBtn = document.getElementById('logoutBtn');
-
+const refreshBtn = document.getElementById('refreshBtn');
 const searchInput = document.getElementById("searchInput");
 const filterOffice = document.getElementById("filterOffice");
 const filterMaintenance = document.getElementById("filterMaintenance");
@@ -240,6 +240,26 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
+  });
+}
+
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', async () => {
+
+    refreshBtn.disabled = true;
+
+    refreshBtn.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Actualizando...
+    `;
+
+    await cargarInventario();
+
+    refreshBtn.disabled = false;
+
+    refreshBtn.innerHTML = `
+      🔄 Actualizar
+    `;
   });
 }
 
