@@ -82,6 +82,8 @@ async function cargarInventario() {
 
     renderTablaPaginada();
     actualizarDashboard(equiposGlobal);
+    destacarEquipoQR();
+    
 
   } catch (err) {
     console.error(err);
@@ -89,6 +91,36 @@ async function cargarInventario() {
       equiposTable.innerHTML = `<tr><td colspan="18">Error al cargar inventario</td></tr>`;
     }
   }
+}
+
+// ----------------- DESTACAR EQUIPO DESDE QR -----------------
+function destacarEquipoQR() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const idEquipo = urlParams.get('id');
+  if (!idEquipo) return;
+
+  setTimeout(() => {
+    // Buscar la fila directamente por data-id
+    const filaEncontrada = document.querySelector(`#equiposTable tbody tr[data-id="${idEquipo}"]`);
+
+    if (filaEncontrada) {
+      // Scroll hasta la fila
+      filaEncontrada.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // Parpadeo 3 veces
+      let parpadeos = 0;
+      const maxParpadeos = 6; // 6 toggles = 3 veces
+      const interval = setInterval(() => {
+        filaEncontrada.classList.toggle("blink");
+        parpadeos++;
+        if (parpadeos >= maxParpadeos) {
+          clearInterval(interval);
+          filaEncontrada.classList.remove("blink");
+        }
+      }, 500);
+    }
+
+  }, 300); // pequeño delay para asegurar que la tabla ya esté renderizada
 }
 
 // Cargar oficinas únicas en el select
@@ -117,6 +149,7 @@ function renderTablaPaginada() {
 
   registrosPagina.forEach(eq => {
     const tr = document.createElement("tr");
+    tr.dataset.id = eq.id;
 
     if (eq.necesitaMantenimiento === "Sí") {
       tr.classList.add("needs-maintenance");
